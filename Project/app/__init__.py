@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, url_for, flash, jsonify, render_template
-from functions import return_something
+from functions import return_something,return_something2
+import flask_excel as excel
 
 # This line sets the app directory as the working directory
 app = Flask(__name__)
@@ -19,6 +20,24 @@ def dosomething():
     return str(return_something())
 
 
+# The dosomething2 route
+@app.route('/dosomething2', methods=['GET', 'POST'])
+def dosomething2():
+    # If the request is a post request
+    if request.method == 'POST':
+        return jsonify({"result": request.get_array(field_name='file')})
+    else:
+        # Show them a form
+        return '''
+        <!doctype html>
+        <title>Upload an excel file</title>
+        <h1>Excel file upload (csv)</h1>
+        <form action="" method=post enctype=multipart/form-data><p>
+        <input type=file name=file><input type=submit value=Upload>
+        </form>
+        '''
+
+
 # A route to the test page that simply returns hello
 @app.route('/hello', methods=['GET'])
 def hello():
@@ -26,7 +45,8 @@ def hello():
 
 
 if __name__ == '__main__':
-
+    # Initiate the excel part of flask
+    excel.init_excel(app)
     # Let the console know that the load is successful
     print("loaded OK")
 
