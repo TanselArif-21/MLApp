@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, url_for, flash, jsonify, render_template, send_from_directory
-from functions import return_something, return_something2, get_prediction_lr
+from functions import return_something, return_something2, get_prediction_lr, get_word_cloud
 import flask_excel as excel
 import pandas as pd
 import os
@@ -63,11 +63,51 @@ def dosomething2():
             res[i] = list(df.iloc[i, :])
 
         # Return the result
-        #return 'The predicted Sale Price of this house is: ' + str(round(result, 2)) + '. \n <button><a href="/plot/' + filename + '">See Sales Price Distribution</a></button><p></p>'
         return 'The predicted Sale Price of this house is: ' + str(round(result, 2)) + '. <p></p> <img src="static/' + filename + '.png"><p></p>'
     else:
         # Show the form page
         return render_template('dosomethingform.html')
+
+
+# The dosomething2 route
+@app.route('/getwordcloud', methods=['GET', 'POST'])
+def getwordcloud():
+    # If the request is a post request
+    if request.method == 'POST':
+        # This line creates a dataframe from a list of lists
+        df = pd.DataFrame(request.get_array(field_name='file'))
+
+        # The first row is the list of column names so set the column names to the first row
+        df.columns = df.iloc[0, :]
+
+        # Now remove the first row
+        df = df[1:]
+
+        # Print the dataframe to the console
+        print(df)
+
+        # Print the column names to the console
+        print(df.columns)
+
+        # These are the values given for the fields
+        input_list = list(request.form.values())
+
+        filename = ''
+        for i in range(4):
+            filename = filename + random.choice(string.ascii_letters)
+
+        get_word_cloud(df, filename + '.png')
+
+        # This code section creates a dictionary where each key is a row in the dataframe
+        res = dict()
+        for i in range(len(df)):
+            res[i] = list(df.iloc[i, :])
+
+        # Return the result
+        return '. <p></p> <img src="static/' + filename + '.png"><p></p><p></p> <img src="static/wc' + filename + '.png"><p></p>'
+    else:
+        # Show the form page
+        return render_template('getwordcloud.html')
 
 
 # A route to the test page that simply returns hello
